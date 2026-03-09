@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+
+## Secrets / Config locaux
+appsettings.Development.json
+appsettings.Local.json
+
+## Publish
+publish/
+out/
+
+## Logs
+*.log
+logs/

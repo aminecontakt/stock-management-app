@@ -1,0 +1,57 @@
+@model StockManagement.Models.Produit
+@{
+    ViewData["Title"] = "Détails du produit";
+}
+
+<div class="card stat-card" style="max-width: 700px; margin: auto;">
+    <div class="card-header bg-info text-white py-3">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>@Model.Nom</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Référence</dt>
+            <dd class="col-sm-8">@(Model.Reference ?? "-")</dd>
+
+            <dt class="col-sm-4">Catégorie</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.Categorie))
+                {
+                    <span class="badge bg-primary-subtle text-primary">@Model.Categorie</span>
+                }
+                else { <span>-</span> }
+            </dd>
+
+            <dt class="col-sm-4">Quantité en stock</dt>
+            <dd class="col-sm-8">
+                <span class="fw-bold @(Model.StockBas ? "text-danger" : "text-success") fs-5">@Model.Quantite unités</span>
+                @if (Model.StockBas)
+                {
+                    <span class="badge bg-danger ms-2"><i class="bi bi-exclamation-triangle-fill"></i> Stock bas</span>
+                }
+            </dd>
+
+            <dt class="col-sm-4">Stock minimum</dt>
+            <dd class="col-sm-8">@Model.StockMinimum unités</dd>
+
+            <dt class="col-sm-4">Prix unitaire</dt>
+            <dd class="col-sm-8 fw-semibold">@Model.Prix.ToString("N2") DH</dd>
+
+            <dt class="col-sm-4">Valeur en stock</dt>
+            <dd class="col-sm-8 fw-bold text-success fs-5">@((Model.Quantite * Model.Prix).ToString("N2")) DH</dd>
+
+            <dt class="col-sm-4">Description</dt>
+            <dd class="col-sm-8">@(Model.Description ?? "-")</dd>
+
+            <dt class="col-sm-4">Date d'ajout</dt>
+            <dd class="col-sm-8">@Model.DateAjout.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+    </div>
+    <div class="card-footer bg-white d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="bi bi-pencil me-1"></i> Modifier
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+</div>

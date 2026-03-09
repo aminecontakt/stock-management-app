@@ -1,0 +1,170 @@
+@model IEnumerable<StockManagement.Models.Produit>
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<!-- Statistiques -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card text-white" style="background: linear-gradient(135deg,#1565c0,#1976d2);">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-boxes fs-1 me-3 opacity-75"></i>
+                <div>
+                    <div class="fs-3 fw-bold">@ViewBag.TotalProduits</div>
+                    <div class="small opacity-75">Produits en catalogue</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-white" style="background: linear-gradient(135deg,#c62828,#e53935);">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle fs-1 me-3 opacity-75"></i>
+                <div>
+                    <div class="fs-3 fw-bold">@ViewBag.StockBas</div>
+                    <div class="small opacity-75">Stock bas / alerte</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-white" style="background: linear-gradient(135deg,#2e7d32,#388e3c);">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-currency-exchange fs-1 me-3 opacity-75"></i>
+                <div>
+                    <div class="fs-3 fw-bold">@string.Format("{0:N2} DH", ViewBag.ValeurTotale)</div>
+                    <div class="small opacity-75">Valeur totale du stock</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barre de recherche -->
+<div class="card stat-card mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold small text-muted">Recherche</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="recherche" value="@ViewBag.Recherche"
+                           class="form-control" placeholder="Nom ou référence..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small text-muted">Catégorie</label>
+                <select name="categorie" class="form-select">
+                    <option value="">Toutes les catégories</option>
+                    @foreach (var cat in (ViewBag.Categories as List<string?> ?? new()))
+                    {
+                        <option value="@cat" selected="@(ViewBag.Categorie == cat)">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Filtrer
+                </button>
+            </div>
+            <div class="col-md-2">
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-x-circle"></i> Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tableau -->
+<div class="card stat-card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <span class="fw-semibold text-primary"><i class="bi bi-table me-2"></i>Liste des produits (@Model.Count())</span>
+        <a asp-action="Create" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nouveau produit
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">Aucun produit trouvé.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Référence</th>
+                            <th>Catégorie</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-end">Prix unitaire</th>
+                            <th class="text-end">Valeur stock</th>
+                            <th class="text-center">Ajuster</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr class="@(p.StockBas ? "table-danger" : "")">
+                                <td>
+                                    <div class="fw-semibold">@p.Nom</div>
+                                    @if (p.StockBas)
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger small">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> Stock bas
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-muted small">@(p.Reference ?? "-")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.Categorie))
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary">@p.Categorie</span>
+                                    }
+                                </td>
+                                <td class="text-center fw-bold @(p.StockBas ? "text-danger" : "text-success")">
+                                    @p.Quantite
+                                </td>
+                                <td class="text-end">@p.Prix.ToString("N2") DH</td>
+                                <td class="text-end fw-semibold">@((p.Quantite * p.Prix).ToString("N2")) DH</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <form method="post" asp-action="AjusterQuantite" asp-route-id="@p.Id" asp-route-delta="-1" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-action" title="Retirer 1">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" asp-action="AjusterQuantite" asp-route-id="@p.Id" asp-route-delta="1" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success btn-action" title="Ajouter 1">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-outline-info btn-action" title="Détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-outline-warning btn-action" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-outline-danger btn-action" title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

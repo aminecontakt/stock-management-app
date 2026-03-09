@@ -1,0 +1,38 @@
+@model StockManagement.Models.Produit
+@{
+    ViewData["Title"] = "Supprimer le produit";
+}
+
+<div class="card stat-card border-danger" style="max-width: 600px; margin: auto;">
+    <div class="card-header bg-danger text-white py-3">
+        <h5 class="mb-0"><i class="bi bi-trash me-2"></i>Confirmer la suppression</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
+        </div>
+        <dl class="row">
+            <dt class="col-sm-4">Nom</dt>
+            <dd class="col-sm-8 fw-bold">@Model.Nom</dd>
+            <dt class="col-sm-4">Référence</dt>
+            <dd class="col-sm-8">@(Model.Reference ?? "-")</dd>
+            <dt class="col-sm-4">Quantité</dt>
+            <dd class="col-sm-8">@Model.Quantite unités</dd>
+            <dt class="col-sm-4">Valeur stock</dt>
+            <dd class="col-sm-8">@((Model.Quantite * Model.Prix).ToString("N2")) DH</dd>
+        </dl>
+    </div>
+    <div class="card-footer bg-white d-flex gap-2">
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash me-1"></i> Oui, supprimer
+            </button>
+        </form>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Annuler
+        </a>
+    </div>
+</div>
